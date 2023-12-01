@@ -1,7 +1,7 @@
 # Quaternion-based Kalman Filter
 
 ~~~
-python quaternion_based_kalman_filter.py
+python script/quaternion_based_kalman_filter.py 
 ~~~
 
 # Reference 
