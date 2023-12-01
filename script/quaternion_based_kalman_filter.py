@@ -20,7 +20,7 @@ class Quaternion():
             axis_angle = np.array(axis_angle)
             norm = np.linalg.norm(axis_angle)
             self.w = np.cos(norm / 2)
-            if norm < 1e-10:  
+            if norm < 1e-10:
                 self.x = 0; self.y = 0; self.z = 0
             else:
                 imag = axis_angle / norm * np.sin(norm / 2)
@@ -71,23 +71,23 @@ var_imu_w = 0.01
 var_gnss = 0.1
 gravity = 9.81
 
-g = np.array([0, 0, -gravity])  
+g = np.array([0, 0, -gravity])
 lJac = np.zeros([9, 6])         # motion model noise jacobian
-lJac[3:, :] = np.eye(6)  
+lJac[3:, :] = np.eye(6)
 hJac = np.zeros([3, 9])         # measurement model jacobian
-hJac[:, :3] = np.eye(3) 
+hJac[:, :3] = np.eye(3)
 
 pEst = np.zeros([imu_a.shape[0], 3])     # position estimates
 vEst = np.zeros([imu_a.shape[0], 3])     # velocity estimates
 qEst = np.zeros([imu_a.shape[0], 4])     # orientation estimates as quaternions
-pCov = np.zeros([imu_a.shape[0], 9, 9])  # covariance matrices 
+pCov = np.zeros([imu_a.shape[0], 9, 9])  # covariance matrices
 
 # Initial values
 pEst[0] = gt_p[0]
 vEst[0] = gt_v_ini
 q_gt_r_ini = Quaternion(euler=gt_r_ini)
 qEst[0] = np.array([q_gt_r_ini.w, q_gt_r_ini.x, q_gt_r_ini.y, q_gt_r_ini.z])
-pCov[0] = np.eye(9)  
+pCov[0] = np.eye(9)
 
 def predict_update(pCovTemp, pTemp, vTemp, qTemp, delta_t, imu_a,  imu_w):
 
@@ -104,7 +104,7 @@ def predict_update(pCovTemp, pTemp, vTemp, qTemp, delta_t, imu_a,  imu_w):
     Q = np.eye(6)
     Q[0:3, 0:3] = var_imu_a * Q[0:3, 0:3]
     Q[3:6, 3:6] = var_imu_w * Q[3:6, 3:6]
-    Q = Q * (delta_t ** 2) 
+    Q = Q * (delta_t ** 2)
     pCov = F @ pCovTemp @ F.T + lJac @ Q @ lJac.T
     return pEst, vEst, qEst, pCov
 
@@ -133,7 +133,7 @@ def main():
     ax = est_traj_fig.add_subplot(111, projection='3d')
 
 
-    for k in range(1, imu_a.shape[0]):  
+    for k in range(1, imu_a.shape[0]):
 
         delta_t = imu_a_t[k] - imu_a_t[k - 1]
         pEst[k], vEst[k], qEst[k], pCov[k] \
@@ -146,8 +146,7 @@ def main():
             hz = np.hstack((hz, gnss[i_gnss].reshape(3,1)))
             i_gnss += 1
 
-    
-       if (k % 50 == 0):
+        if (k % 50 == 0):
             plt.cla()
             ax.plot(hz[0,:], hz[1,:], hz[2,:], ".g", label='GPS')
             ax.plot(pEst[:,0], pEst[:,1], pEst[:,2], '.r', label='Estimated', markersize=1)
